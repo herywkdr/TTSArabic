@@ -76,6 +76,8 @@ code{background:#eef0ec;padding:1px 5px;border-radius:4px}
       <label>Jeda titik (.)<select id="period"></select></label>
     </div>
     <label>Jeda antar-bagian/pembicara<select id="gap"></select></label>
+    <label style="margin:0">Panjang per bagian (karakter)<select id="len"></select></label>
+    <p class="hint" style="margin:6px 0 0">Bagian lebih panjang = permintaan API lebih sedikit, tetapi suara bisa kurang konsisten pada naskah panjang.</p>
   </section>
 </aside>
 
@@ -120,9 +122,10 @@ const EMO=[
 const SPD=[['sangat_lambat','Sangat lambat','at a very slow, deliberate pace'],['lambat','Lambat','at a slow pace'],['normal','Normal','at a normal pace'],['cepat','Cepat','at a fast pace'],['sangat_cepat','Sangat cepat','at a very fast pace']].map(([id,l,p])=>({id,l,p}));
 const CM=[['singkat','Singkat (0.3 dtk)','a brief pause'],['normal','Normal (0.6 dtk)','a normal pause'],['lama','Lama (1 dtk)','a distinct pause']].map(([id,l,p])=>({id,l,p}));
 const PD=[['normal','Normal (1 dtk)','a normal sentence break'],['lama','Lama (1.5 dtk)','a long sentence break'],['sangat_lama','Sangat lama (2.5 dtk)','a very long sentence break']].map(([id,l,p])=>({id,l,p}));
+const LENS=[[600,'Pendek (600) – paling stabil'],[1500,'Sedang (1500) – seimbang'],[3000,'Panjang (3000) – paling hemat kuota']];
 const GAPS=[[300,'Singkat (0.3 dtk)'],[600,'Normal (0.6 dtk)'],[1000,'Lama (1 dtk)'],[1500,'Sangat lama (1.5 dtk)']];
 
-const S={chars:[{id:uid(),name:'Tariq',voice:'Charon',emo:'normal'},{id:uid(),name:'Aisha',voice:'Aoede',emo:'normal'}],speed:'normal',comma:'normal',period:'normal',gap:600};
+const S={chars:[{id:uid(),name:'Tariq',voice:'Charon',emo:'normal'},{id:uid(),name:'Aisha',voice:'Aoede',emo:'normal'}],speed:'normal',comma:'normal',period:'normal',gap:600,len:600};
 let busy=false,ac=null,curBlob=null,hist=[];
 
 /* ---------- penyimpanan ---------- */
@@ -150,6 +153,7 @@ function updateMode(){
 function fillSeg(){
  $('speed').innerHTML=SPD.map(s=>`<button type="button" data-s="${s.id}" aria-pressed="${s.id===S.speed}">${s.l}</button>`).join('');
  $('comma').innerHTML=opts(CM,S.comma);$('period').innerHTML=opts(PD,S.period);
+ $('len').innerHTML=LENS.map(([v,l])=>`<option value="${v}"${v===S.len?' selected':''}>${l}</option>`).join('');
  $('gap').innerHTML=GAPS.map(([v,l])=>`<option value="${v}"${v===S.gap?' selected':''}>${l}</option>`).join('');
 }
 function stat(){
@@ -183,7 +187,7 @@ function parse(text){
  });
  return segs;
 }
-function chunk(t,max=600){
+function chunk(t,max=S.len){
  const out=[];let cur='';
  for(const s of t.replace(/([.!?؟…])\s+/g,'$1\n').split('\n')){if(cur&&(cur+' '+s).length>max){out.push(cur);cur=s}else cur=cur?cur+' '+s:s}
  if(cur)out.push(cur);return out;
@@ -196,7 +200,7 @@ function buildJobs(segs){
   let b=[],n=0;
   const flush=()=>{if(!b.length)return;const u=[...new Set(b.map(x=>x.speaker))];
    if(u.length===2)J.push({sp:u,text:b.map(x=>`${x.speaker}: ${x.text}`).join('\n')});else b.forEach(x=>single(x.speaker,x.text));b=[];n=0};
-  segs.forEach(s=>{if(n+s.text.length>1200)flush();b.push(s);n+=s.text.length});flush();
+  segs.forEach(s=>{if(n+s.text.length>S.len*2)flush();b.push(s);n+=s.text.length});flush();
  }else segs.forEach(s=>single(s.speaker,s.text));
  return J;
 }
@@ -314,6 +318,7 @@ $('add').onclick=()=>{
 $('speed').onclick=e=>{const s=e.target.dataset.s;if(s){S.speed=s;fillSeg();save()}};
 $('comma').onchange=e=>{S.comma=e.target.value;save()};
 $('period').onchange=e=>{S.period=e.target.value;save()};
+$('len').onchange=e=>{S.len=+e.target.value;stat();save()};
 $('gap').onchange=e=>{S.gap=+e.target.value;save()};
 $('tpl').onclick=()=>{$('script').value=template();stat();save()};
 $('chips').onclick=e=>{
