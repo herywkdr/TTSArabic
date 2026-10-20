@@ -12,8 +12,9 @@ body{margin:0;font:14px/1.5 Inter,system-ui,sans-serif;background:var(--bg);colo
 header{background:var(--gd);color:#fff;padding:16px}
 header>div,main{max-width:1100px;margin:0 auto}
 h1{margin:0;font-size:22px}h1 small{font-weight:400;opacity:.7;font-size:14px;margin-left:8px}
-main{padding:16px;display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:900px){main{grid-template-columns:380px 1fr;align-items:start}}
+main{padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+main>*{min-width:0}
+@media(min-width:900px){main{grid-template-columns:360px minmax(0,1fr);align-items:start}}
 .card{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
 .card h2{margin:0 0 10px;font-size:15px}
 label{display:block;font-size:12px;color:var(--mut);margin-bottom:8px}
@@ -46,7 +47,7 @@ textarea{width:100%;min-height:260px;padding:14px;border:1px solid #cfd5cc;borde
 [hidden]{display:none!important}
 audio{width:100%;margin:8px 0}
 .hi{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--bd)}
-.hi .t{flex:1;min-width:0}.hi .a{font:18px "Scheherazade New",serif;direction:rtl;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi .t{flex:1 1 0;min-width:0;overflow:hidden}.hi .btn,.hi .ico{flex:none}.hi .a{font:18px "Scheherazade New",serif;direction:rtl;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hi .m{font-size:11px;color:var(--mut)}
 code{background:#eef0ec;padding:1px 5px;border-radius:4px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
