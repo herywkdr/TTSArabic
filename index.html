@@ -95,10 +95,31 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
                 <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Kecepatan Bicara
+                    Pengaturan Global (Kecepatan & Jeda)
                 </h2>
-                <div id="speed-container" class="flex bg-slate-100 p-1 rounded-lg">
-                    <!-- Speeds will be injected here via JS -->
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs md:text-sm text-slate-700 font-medium mb-2">Kecepatan Bicara</label>
+                        <div id="speed-container" class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
+                            <!-- Speeds will be injected here via JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+                        <div>
+                            <label class="block text-xs md:text-sm text-slate-700 font-medium mb-1">Jeda Koma (،)</label>
+                            <select id="comma-pause-select" onchange="currentCommaPause = this.value" class="w-full text-xs md:text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <!-- options will be injected here via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-sm text-slate-700 font-medium mb-1">Jeda Titik (.)</label>
+                            <select id="period-pause-select" onchange="currentPeriodPause = this.value" class="w-full text-xs md:text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <!-- options will be injected here via JS -->
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -204,9 +225,23 @@
         ];
 
         const SPEEDS = [
-            { id: 'lambat', label: 'Lambat', prompt: 'at a slow, deliberate pace' },
+            { id: 'sangat_lambat', label: 'Sangat Lambat', prompt: 'at a very slow, highly deliberate pace' },
+            { id: 'lambat', label: 'Lambat', prompt: 'at a slow, unhurried pace' },
             { id: 'normal', label: 'Normal', prompt: 'at a normal conversational pace' },
-            { id: 'cepat', label: 'Cepat', prompt: 'at a fast, urgent pace' }
+            { id: 'cepat', label: 'Cepat', prompt: 'at a fast pace' },
+            { id: 'sangat_cepat', label: 'Sangat Cepat', prompt: 'at a very fast, rapid pace' }
+        ];
+
+        const COMMA_PAUSES = [
+            { id: 'singkat', label: 'Singkat (0.3s)', prompt: 'a brief pause (about 0.3 seconds)' },
+            { id: 'normal', label: 'Normal (0.6s)', prompt: 'a standard pause (about 0.6 seconds)' },
+            { id: 'lama', label: 'Lama (1.0s)', prompt: 'a distinct pause (about 1.0 seconds)' }
+        ];
+
+        const PERIOD_PAUSES = [
+            { id: 'normal', label: 'Normal (1.0s)', prompt: 'a standard sentence break (about 1.0 seconds)' },
+            { id: 'lama', label: 'Lama (1.5s)', prompt: 'a long sentence break (about 1.5 seconds)' },
+            { id: 'sangat_lama', label: 'Sangat Lama (2.5s)', prompt: 'a very long sentence break (about 2.5 seconds)' }
         ];
 
         // ==========================================
@@ -217,6 +252,8 @@
             { id: (Date.now() + 1).toString(), name: 'Aisha', voice: 'Aoede', emotion: 'normal' }
         ];
         let currentSpeed = 'normal';
+        let currentCommaPause = 'normal';
+        let currentPeriodPause = 'normal';
         let isGenerating = false;
         let historyData = [];
         let currentAudioBlob = null;
@@ -297,6 +334,7 @@
             document.getElementById('script-input').value = defaultScript;
             renderCharacters();
             renderSpeedOptions();
+            renderPauseOptions();
             
             // Event Listeners
             document.getElementById('add-char-btn').addEventListener('click', addCharacter);
@@ -309,6 +347,14 @@
             document.getElementById('api-key-input').addEventListener('change', (e) => {
                 localStorage.setItem('muntiqu_api_key', e.target.value.trim());
             });
+        }
+
+        function renderPauseOptions() {
+            const commaSelect = document.getElementById('comma-pause-select');
+            commaSelect.innerHTML = COMMA_PAUSES.map(c => `<option value="${c.id}" ${c.id === currentCommaPause ? 'selected' : ''}>${c.label}</option>`).join('');
+            
+            const periodSelect = document.getElementById('period-pause-select');
+            periodSelect.innerHTML = PERIOD_PAUSES.map(p => `<option value="${p.id}" ${p.id === currentPeriodPause ? 'selected' : ''}>${p.label}</option>`).join('');
         }
 
         function renderCharacters() {
@@ -356,7 +402,7 @@
             SPEEDS.forEach(s => {
                 const btn = document.createElement('button');
                 btn.innerText = s.label;
-                btn.className = `flex-1 py-1.5 md:py-2 text-xs md:text-sm rounded-md transition-all ${currentSpeed === s.id ? 'bg-white shadow-sm font-semibold text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`;
+                btn.className = `flex-1 min-w-[50px] py-1.5 md:py-2 text-[10px] md:text-[13px] rounded-md transition-all ${currentSpeed === s.id ? 'bg-white shadow-sm font-semibold text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`;
                 btn.onclick = () => {
                     currentSpeed = s.id;
                     renderSpeedOptions();
@@ -444,6 +490,12 @@
             const HARDCODED_API_KEY = ""; 
             const finalApiKey = HARDCODED_API_KEY || apiKeyInput || "";
 
+            // PERBAIKAN: Cek apakah API Key kosong sebelum menghubungi Google
+            if (!finalApiKey) {
+                showError("API Key tidak boleh kosong! Silakan masukkan Google Gemini API Key di panel kiri.");
+                return;
+            }
+
             const script = document.getElementById('script-input').value;
             if (!script.trim()) {
                 showError("Teks percakapan tidak boleh kosong.");
@@ -468,6 +520,9 @@
 
             try {
                 const speedConfig = SPEEDS.find(s => s.id === currentSpeed).prompt;
+                const commaConfig = COMMA_PAUSES.find(c => c.id === currentCommaPause).prompt;
+                const periodConfig = PERIOD_PAUSES.find(p => p.id === currentPeriodPause).prompt;
+                
                 let emotionInstructions = characters.map(c => {
                     const emotionPrompt = EMOTIONS.find(e => e.id === c.emotion).prompt;
                     return `Make speaker ${c.name} sound ${emotionPrompt}.`;
@@ -477,6 +532,7 @@
 Read the following Arabic (Fusha/Modern Standard Arabic) conversation.
 Instructions:
 - Speak ${speedConfig}.
+- Pacing/Pauses: Take ${commaConfig} whenever you encounter a comma (، or ,). Take ${periodConfig} whenever you encounter a period (.).
 ${emotionInstructions}
 
 Conversation Transcript:
