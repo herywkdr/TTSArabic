@@ -1,698 +1,328 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muntiqu - Pembuat Percakapan & Monolog Arab</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        arabic: ['"Scheherazade New"', '"Amiri"', 'serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.4s ease-out forwards;
-        }
-        textarea::-webkit-scrollbar {
-            width: 8px;
-        }
-        textarea::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-            border-radius: 8px;
-        }
-        textarea::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 8px;
-        }
-        textarea::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Muntiqu – TTS Monolog & Dialog Arab</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Scheherazade+New:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--g:#047857;--gd:#064e3b;--bg:#f6f7f5;--bd:#dfe3dc;--mut:#667085;--err:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 Inter,system-ui,sans-serif;background:var(--bg);color:#1d2939}
+header{background:var(--gd);color:#fff;padding:16px}
+header>div,main{max-width:1100px;margin:0 auto}
+h1{margin:0;font-size:22px}h1 small{font-weight:400;opacity:.7;font-size:14px;margin-left:8px}
+main{padding:16px;display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){main{grid-template-columns:380px 1fr;align-items:start}}
+.card{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:15px}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:8px}
+input,select,textarea,button{font:inherit}
+input,select{width:100%;margin-top:3px;padding:8px 10px;border:1px solid #cfd5cc;border-radius:8px;background:#fff;color:inherit}
+:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.char{background:#fafbf9;margin-bottom:8px}
+.ico{border:0;background:none;color:var(--mut);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}
+.ico:hover{color:var(--err);background:#fee4e2}
+.btn{border:1px solid #cfd5cc;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--g);color:var(--g)}
+.add{width:100%;border-style:dashed}
+.seg{display:flex;flex-wrap:wrap;gap:2px;background:#eef0ec;padding:3px;border-radius:8px}
+.seg button{flex:1;min-width:60px;border:0;background:none;padding:6px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--mut)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--g);font-weight:600;box-shadow:0 1px 2px #0002}
+.badge{display:inline-block;background:#d1fae5;color:var(--gd);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600}
+.hint{font-size:12px;color:var(--mut);margin:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chips button{border:1px solid var(--g);color:var(--g);background:#ecfdf5;border-radius:20px;padding:3px 12px;cursor:pointer;font-size:12px}
+textarea{width:100%;min-height:260px;padding:14px;border:1px solid #cfd5cc;border-radius:8px;resize:vertical;font:22px/2.1 "Scheherazade New",serif;direction:rtl;text-align:right}
+.go{width:100%;margin-top:10px;padding:12px;border:0;border-radius:8px;background:var(--g);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.go:hover{background:var(--gd)}
+.cancel{background:#fff;color:var(--err);border:1px solid var(--err)}
+.cancel:hover{background:#fee4e2}
+.bar{height:6px;background:#e4e7e0;border-radius:4px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--g);width:0;transition:width .3s}
+.err{background:#fef3f2;border:1px solid #fecdca;color:var(--err);padding:10px;border-radius:8px;margin-top:10px}
+[hidden]{display:none!important}
+audio{width:100%;margin:8px 0}
+.hi{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--bd)}
+.hi .t{flex:1;min-width:0}.hi .a{font:18px "Scheherazade New",serif;direction:rtl;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi .m{font-size:11px;color:var(--mut)}
+code{background:#eef0ec;padding:1px 5px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans selection:bg-emerald-200">
-
-    <header class="bg-emerald-800 text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-5 md:py-6">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Muntiqu <span class="text-emerald-300 font-light text-lg md:text-xl">| منتق</span></h1>
-            <p class="mt-1 md:mt-2 text-emerald-100 text-xs md:text-sm">Widget TTS Percakapan & Monolog Bahasa Arab Fusha - Google Sites Edition</p>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4 py-6 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-        
-        <!-- LEFT PANEL: SETTINGS -->
-        <div class="lg:col-span-5 space-y-6">
-            
-            <!-- API KEY SETTING -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                    Koneksi API (Wajib)
-                </h2>
-                <div>
-                    <label class="block text-xs md:text-sm text-slate-600 mb-2">Google Gemini API Key</label>
-                    <input type="password" id="api-key-input" placeholder="Paste API Key di sini..." class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow">
-                    <p class="text-[10px] md:text-xs text-slate-400 mt-2">Dapatkan API Key gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-emerald-500 hover:underline">Google AI Studio</a>. Key disimpan di browser Anda.</p>
-                </div>
-            </div>
-
-            <!-- CHARACTER SETTINGS -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    Pengaturan Karakter / Pembicara
-                </h2>
-                
-                <div id="characters-list" class="space-y-4 mb-4">
-                    <!-- Dynamic Character Items -->
-                </div>
-
-                <button id="add-char-btn" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 transition-all flex items-center justify-center text-sm font-medium">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Tambah Karakter
-                </button>
-            </div>
-
-            <!-- GLOBAL SETTINGS -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Pengaturan Global (Kecepatan & Jeda)
-                </h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs md:text-sm text-slate-700 font-medium mb-2">Kecepatan Bicara</label>
-                        <div id="speed-container" class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
-                            <!-- Dynamic Speed Options -->
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-3">
-                        <div>
-                            <label class="block text-xs md:text-sm text-slate-700 font-medium mb-1">Jeda Koma (،)</label>
-                            <select id="comma-pause-select" onchange="currentCommaPause = this.value" class="w-full text-xs md:text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <!-- Dynamic Comma Options -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs md:text-sm text-slate-700 font-medium mb-1">Jeda Titik (.)</label>
-                            <select id="period-pause-select" onchange="currentPeriodPause = this.value" class="w-full text-xs md:text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <!-- Dynamic Period Options -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- RIGHT PANEL: EDITOR & OUTPUT -->
-        <div class="lg:col-span-7 space-y-6">
-            
-            <!-- SCRIPT EDITOR -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full min-h-[400px]">
-                <div class="p-3 md:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
-                    <h2 class="font-semibold flex items-center text-sm md:text-base">
-                        <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        Teks Percakapan / Monolog
-                    </h2>
-                    <button id="template-btn" class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 md:px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors border border-emerald-100">
-                        Isi Template
-                    </button>
-                </div>
-                
-                <div class="p-3 md:p-4 flex-grow flex flex-col">
-                    <!-- Format Information Banner -->
-                    <div id="format-info-banner" class="mb-3 text-xs md:text-sm text-slate-600 bg-blue-50 border border-blue-100 p-3 rounded-xl transition-all">
-                        <!-- Dynamic format notice -->
-                    </div>
-                    
-                    <textarea id="script-input" dir="rtl" class="w-full flex-grow min-h-[250px] p-4 text-right text-lg md:text-xl border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y font-arabic leading-loose shadow-inner" placeholder="Tulis atau paste teks Arab di sini..."></textarea>
-                </div>
-                
-                <div class="p-3 md:p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
-                    <!-- Error Message Display -->
-                    <div id="error-msg-container" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm rounded-lg flex items-start">
-                        <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span id="error-msg-text"></span>
-                    </div>
-                    
-                    <button id="generate-btn" class="w-full py-3 px-4 rounded-xl text-white font-semibold flex justify-center items-center transition-all bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg text-sm md:text-base">
-                        <span id="generate-btn-content" class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Hasilkan Suara
-                        </span>
-                        <span id="generate-btn-loading" class="hidden flex items-center">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            Memproses Audio...
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- CURRENT AUDIO PLAYER -->
-            <div id="current-audio-container" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl shadow-sm border border-emerald-100 p-4 md:p-5 animate-fade-in-up">
-                <h3 class="font-semibold text-emerald-800 mb-3 text-sm md:text-base">Hasil Audio Terbaru</h3>
-                <audio id="current-audio-player" controls class="w-full mb-4 rounded-xl shadow-sm"></audio>
-                <button id="download-current-btn" class="w-full bg-white border border-emerald-200 text-emerald-700 font-medium py-2 px-4 rounded-xl shadow-sm hover:bg-emerald-50 transition-colors flex items-center justify-center text-sm">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download WAV
-                </button>
-            </div>
-
-            <!-- HISTORY LIST -->
-            <div id="history-wrapper" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Riwayat Pembuatan
-                </h2>
-                <div id="history-list" class="space-y-3">
-                    <!-- Dynamic History Items -->
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <script>
-        // ==========================================
-        // CONFIGURATION & CONSTANTS
-        // ==========================================
-        const VOICES = {
-            MALE: [
-                { name: 'Tariq', voice: 'Charon', label: 'Tariq (Tegas & Berat)' },
-                { name: 'Zaid', voice: 'Fenrir', label: 'Zaid (Bersemangat)' },
-                { name: 'Omar', voice: 'Orus', label: 'Omar (Berwibawa)' }
-            ],
-            FEMALE: [
-                { name: 'Fatima', voice: 'Kore', label: 'Fatima (Jelas & Lantang)' },
-                { name: 'Aisha', voice: 'Aoede', label: 'Aisha (Lembut & Tenang)' },
-                { name: 'Layla', voice: 'Leda', label: 'Layla (Muda & Ceria)' }
-            ]
-        };
-
-        const EMOTIONS = [
-            { id: 'normal', label: 'Normal (Default)', prompt: 'normal and natural' },
-            { id: 'kalem', label: 'Kalem', prompt: 'calm, relaxed, and soothing' },
-            { id: 'marah', label: 'Marah', prompt: 'angry, furious, and stern' },
-            { id: 'sedih', label: 'Sedih', prompt: 'sad, melancholic, and heartbroken' },
-            { id: 'senang', label: 'Senang', prompt: 'happy, joyful, and cheerful' },
-            { id: 'dramatis', label: 'Dramatis', prompt: 'highly dramatic, theatrical, and expressive' },
-            { id: 'resmi', label: 'Resmi', prompt: 'official, formal, and authoritative' },
-            { id: 'pembaca_berita', label: 'Pembaca Berita', prompt: 'like a professional news anchor, clear and objective' },
-            { id: 'announcer', label: 'Announcer (Bandara)', prompt: 'like a public address announcer at an airport, echoing and clear' },
-            { id: 'pengajar', label: 'Pengajar', prompt: 'like an articulate teacher, explanatory and patient' },
-            { id: 'terkejut', label: 'Terkejut', prompt: 'surprised, shocked, and gasping' },
-            { id: 'perasa', label: 'Perasa', prompt: 'highly emotional, sensitive, and touching' }
-        ];
-
-        const SPEEDS = [
-            { id: 'sangat_lambat', label: 'Sangat Lambat', prompt: 'at a very slow, highly deliberate pace' },
-            { id: 'lambat', label: 'Lambat', prompt: 'at a slow, unhurried pace' },
-            { id: 'normal', label: 'Normal', prompt: 'at a normal conversational pace' },
-            { id: 'cepat', label: 'Cepat', prompt: 'at a fast pace' },
-            { id: 'sangat_cepat', label: 'Sangat Cepat', prompt: 'at a very fast, rapid pace' }
-        ];
-
-        const COMMA_PAUSES = [
-            { id: 'singkat', label: 'Singkat (0.3s)', prompt: 'a brief pause (about 0.3 seconds)' },
-            { id: 'normal', label: 'Normal (0.6s)', prompt: 'a standard pause (about 0.6 seconds)' },
-            { id: 'lama', label: 'Lama (1.0s)', prompt: 'a distinct pause (about 1.0 seconds)' }
-        ];
-
-        const PERIOD_PAUSES = [
-            { id: 'normal', label: 'Normal (1.0s)', prompt: 'a standard sentence break (about 1.0 seconds)' },
-            { id: 'lama', label: 'Lama (1.5s)', prompt: 'a long sentence break (about 1.5 seconds)' },
-            { id: 'sangat_lama', label: 'Sangat Lama (2.5s)', prompt: 'a very long sentence break (about 2.5 seconds)' }
-        ];
-
-        // ==========================================
-        // STATE MANAGEMENT
-        // ==========================================
-        let characters = [
-            { id: Date.now().toString(), name: 'Tariq', voice: 'Charon', emotion: 'normal' },
-            { id: (Date.now() + 1).toString(), name: 'Aisha', voice: 'Aoede', emotion: 'normal' }
-        ];
-        let currentSpeed = 'normal';
-        let currentCommaPause = 'normal';
-        let currentPeriodPause = 'normal';
-        let isGenerating = false;
-        let historyData = [];
-        let currentAudioBlob = null;
-
-        // ==========================================
-        // AUDIO PROCESSING UTILITIES
-        // ==========================================
-        function base64ToArrayBuffer(base64) {
-            const binary_string = window.atob(base64);
-            const len = binary_string.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary_string.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function writeString(view, offset, string) {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
-        }
-
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1; // Gemini TTS returns mono
-            const byteRate = sampleRate * numChannels * 2;
-            const blockAlign = numChannels * 2;
-            const buffer = new ArrayBuffer(44 + pcm16.byteLength);
-            const view = new DataView(buffer);
-
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + pcm16.byteLength, true);
-            writeString(view, 8, 'WAVE');
-            
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true); 
-            view.setUint16(20, 1, true); 
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, 16, true); 
-            
-            writeString(view, 36, 'data');
-            view.setUint32(40, pcm16.byteLength, true);
-
-            let offset = 44;
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-        function downloadBlob(blob, filename) {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        // ==========================================
-        // UI RENDERING & LOGIC
-        // ==========================================
-        function initApp() {
-            const savedKey = localStorage.getItem('muntiqu_api_key');
-            if (savedKey) document.getElementById('api-key-input').value = savedKey;
-
-            renderCharacters();
-            renderSpeedOptions();
-            renderPauseOptions();
-            insertTemplate(); // Set default template
-            
-            // Event Listeners
-            document.getElementById('add-char-btn').addEventListener('click', addCharacter);
-            document.getElementById('template-btn').addEventListener('click', insertTemplate);
-            document.getElementById('generate-btn').addEventListener('click', handleGenerate);
-            document.getElementById('download-current-btn').addEventListener('click', () => {
-                if(currentAudioBlob) downloadBlob(currentAudioBlob, `Muntiqu_${Date.now()}.wav`);
-            });
-            
-            document.getElementById('api-key-input').addEventListener('change', (e) => {
-                localStorage.setItem('muntiqu_api_key', e.target.value.trim());
-            });
-        }
-
-        function updateModeUI() {
-            const banner = document.getElementById('format-info-banner');
-            const templateBtn = document.getElementById('template-btn');
-            
-            if (characters.length === 1) {
-                banner.innerHTML = `<p><strong>Mode Monolog (1 Karakter):</strong> Ketik atau paste teks Bahasa Arab secara langsung. Tidak perlu menyertakan nama karakter di dalam teks.</p>`;
-                if (templateBtn) templateBtn.innerText = "Isi Template Monolog";
-            } else {
-                banner.innerHTML = `<p><strong>Mode Percakapan (${characters.length} Karakter):</strong> Gunakan format <code class="bg-white px-1.5 py-0.5 rounded text-blue-700 font-semibold border border-blue-200">NamaKarakter: Teks Arab</code> untuk setiap baris.</p>`;
-                if (templateBtn) templateBtn.innerText = "Isi Template Percakapan";
-            }
-        }
-
-        function renderPauseOptions() {
-            const commaSelect = document.getElementById('comma-pause-select');
-            commaSelect.innerHTML = COMMA_PAUSES.map(c => `<option value="${c.id}" ${c.id === currentCommaPause ? 'selected' : ''}>${c.label}</option>`).join('');
-            
-            const periodSelect = document.getElementById('period-pause-select');
-            periodSelect.innerHTML = PERIOD_PAUSES.map(p => `<option value="${p.id}" ${p.id === currentPeriodPause ? 'selected' : ''}>${p.label}</option>`).join('');
-        }
-
-        function renderCharacters() {
-            const container = document.getElementById('characters-list');
-            container.innerHTML = '';
-
-            const buildMaleOptions = (selected) => VOICES.MALE.map(v => `<option value="${v.name}" ${v.name === selected ? 'selected' : ''}>${v.label}</option>`).join('');
-            const buildFemaleOptions = (selected) => VOICES.FEMALE.map(v => `<option value="${v.name}" ${v.name === selected ? 'selected' : ''}>${v.label}</option>`).join('');
-            const buildEmotionOptions = (selected) => EMOTIONS.map(e => `<option value="${e.id}" ${e.id === selected ? 'selected' : ''}>${e.label}</option>`).join('');
-
-            characters.forEach((char, index) => {
-                const charDiv = document.createElement('div');
-                charDiv.className = 'p-3 md:p-4 bg-slate-50 rounded-xl border border-slate-200 relative group animate-fade-in-up';
-                charDiv.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="font-medium text-xs md:text-sm text-slate-500 uppercase tracking-wider">Pembicara ${index + 1}</span>
-                        <button onclick="removeCharacter('${char.id}')" class="text-slate-400 hover:text-red-500 transition-colors" title="Hapus Karakter">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] md:text-xs text-slate-500 mb-1">Nama / Suara</label>
-                            <select onchange="updateCharacter('${char.id}', 'name', this.value)" class="w-full text-xs md:text-sm bg-white border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <optgroup label="Pria">${buildMaleOptions(char.name)}</optgroup>
-                                <optgroup label="Wanita">${buildFemaleOptions(char.name)}</optgroup>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] md:text-xs text-slate-500 mb-1">Emosi / Nuansa</label>
-                            <select onchange="updateCharacter('${char.id}', 'emotion', this.value)" class="w-full text-xs md:text-sm bg-white border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                ${buildEmotionOptions(char.emotion)}
-                            </select>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(charDiv);
-            });
-
-            updateModeUI();
-        }
-
-        function renderSpeedOptions() {
-            const container = document.getElementById('speed-container');
-            container.innerHTML = '';
-            SPEEDS.forEach(s => {
-                const btn = document.createElement('button');
-                btn.innerText = s.label;
-                btn.className = `flex-1 min-w-[50px] py-1.5 md:py-2 text-[10px] md:text-[13px] rounded-md transition-all ${currentSpeed === s.id ? 'bg-white shadow-sm font-semibold text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`;
-                btn.onclick = () => {
-                    currentSpeed = s.id;
-                    renderSpeedOptions();
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        function addCharacter() {
-            const usedNames = characters.map(c => c.name);
-            const allAvailable = [...VOICES.MALE, ...VOICES.FEMALE];
-            const available = allAvailable.find(v => !usedNames.includes(v.name)) || VOICES.MALE[0];
-            characters.push({ id: Date.now().toString(), name: available.name, voice: available.voice, emotion: 'normal' });
-            renderCharacters();
-        }
-
-        window.removeCharacter = function(id) {
-            if (characters.length <= 1) {
-                showError("Harus ada minimal 1 karakter/pembicara.");
-                return;
-            }
-            characters = characters.filter(c => c.id !== id);
-            renderCharacters();
-        }
-
-        window.updateCharacter = function(id, field, value) {
-            const charIndex = characters.findIndex(c => c.id === id);
-            if (charIndex > -1) {
-                characters[charIndex][field] = value;
-                if (field === 'name') {
-                    const allVoices = [...VOICES.MALE, ...VOICES.FEMALE];
-                    const matchedVoice = allVoices.find(v => v.name === value);
-                    if (matchedVoice) characters[charIndex].voice = matchedVoice.voice;
-                }
-                renderCharacters();
-            }
-        }
-
-        function insertTemplate() {
-            const scriptEl = document.getElementById('script-input');
-            if (characters.length === 1) {
-                scriptEl.value = `أَهْلًا وَسَهْلًا بِكُمْ فِي نَشْرَةِ الْأَخْبَارِ. نُقَدِّمُ لَكُمُ الْيَوْمَ أَهَمَّ الْأَحْدَاثِ الْعَالَمِيَّةِ وَالْمَحَلِّيَّةِ. شُكْرًا لِإِصْغَائِكُمْ.`;
-            } else {
-                const char1 = characters[0]?.name || 'Tariq';
-                const char2 = characters[1]?.name || 'Aisha';
-                scriptEl.value = `${char1}: السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ\n${char2}: وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ. كَيْفَ حَالُكَ؟\n${char1}: أَنَا بِخَيْرٍ وَالْحَمْدُ لِلَّهِ. هَلْ أَنْتِ مُسْتَعِدَّةٌ لِلدَّرْسِ الْيَوْم؟\n${char2}: نَعَمْ، بِكُلِّ تَأْكِيد.`;
-            }
-        }
-
-        function showError(msg) {
-            document.getElementById('error-msg-text').innerText = msg;
-            document.getElementById('error-msg-container').classList.remove('hidden');
-        }
-
-        function hideError() {
-            document.getElementById('error-msg-container').classList.add('hidden');
-        }
-
-        function setGeneratingState(isGen) {
-            isGenerating = isGen;
-            const btn = document.getElementById('generate-btn');
-            const content = document.getElementById('generate-btn-content');
-            const loading = document.getElementById('generate-btn-loading');
-            
-            if (isGen) {
-                btn.classList.replace('bg-emerald-600', 'bg-emerald-400');
-                btn.classList.add('cursor-not-allowed');
-                btn.disabled = true;
-                content.classList.add('hidden');
-                loading.classList.remove('hidden');
-            } else {
-                btn.classList.replace('bg-emerald-400', 'bg-emerald-600');
-                btn.classList.remove('cursor-not-allowed');
-                btn.disabled = false;
-                content.classList.remove('hidden');
-                loading.classList.add('hidden');
-            }
-        }
-
-        async function handleGenerate() {
-            if (isGenerating) return;
-            hideError();
-
-            const apiKeyInput = document.getElementById('api-key-input').value.trim();
-            const HARDCODED_API_KEY = ""; 
-            const finalApiKey = HARDCODED_API_KEY || apiKeyInput || "";
-
-            if (!finalApiKey) {
-                showError("API Key tidak boleh kosong! Silakan masukkan Google Gemini API Key di panel kiri.");
-                return;
-            }
-
-            const script = document.getElementById('script-input').value.trim();
-            if (!script) {
-                showError("Teks tidak boleh kosong.");
-                return;
-            }
-
-            let finalScript = "";
-
-            // LOGIKA PEMISAH MONOLOG DAN PERCAKAPAN
-            if (characters.length === 1) {
-                // Mode Monolog: Pasangkan nama karakter secara otomatis jika pengguna tidak menulis "Nama:"
-                const firstChar = characters[0].name;
-                const lines = script.split('\n').filter(l => l.trim().length > 0);
-                
-                finalScript = lines.map(line => {
-                    if (line.includes(':')) {
-                        return line;
-                    } else {
-                        return `${firstChar}: ${line}`;
-                    }
-                }).join('\n');
-            } else {
-                // Mode Percakapan: Wajib menggunakan format Nama: Teks
-                const lines = script.split('\n').filter(l => l.trim().length > 0);
-                let validFormat = true;
-                for (let line of lines) {
-                    if (!line.includes(':')) {
-                        validFormat = false;
-                        break;
-                    }
-                }
-
-                if (!validFormat) {
-                    showError("Format script percakapan salah. Karena terdapat lebih dari 1 karakter, harap gunakan format 'Nama: Teks'. (Contoh: Tariq: السلام)");
-                    return;
-                }
-
-                finalScript = script;
-            }
-
-            setGeneratingState(true);
-
-            try {
-                const speedConfig = SPEEDS.find(s => s.id === currentSpeed).prompt;
-                const commaConfig = COMMA_PAUSES.find(c => c.id === currentCommaPause).prompt;
-                const periodConfig = PERIOD_PAUSES.find(p => p.id === currentPeriodPause).prompt;
-                
-                let emotionInstructions = characters.map(c => {
-                    const emotionPrompt = EMOTIONS.find(e => e.id === c.emotion).prompt;
-                    return `Make speaker ${c.name} sound ${emotionPrompt}.`;
-                }).join('\n');
-
-                const systemPrompt = `You are a professional voice director generating a TTS sequence.
-Read the following Arabic (Fusha/Modern Standard Arabic) text.
-Instructions:
-- Speak ${speedConfig}.
-- Pacing/Pauses: Take ${commaConfig} whenever you encounter a comma (، or ,). Take ${periodConfig} whenever you encounter a period (.).
-${emotionInstructions}
-
-Transcript:
-${finalScript}`;
-
-                const speakerVoiceConfigs = characters.map(c => ({
-                    speaker: c.name,
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: c.voice } }
-                }));
-
-                const payload = {
-                    contents: [{ parts: [{ text: systemPrompt }] }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            multiSpeakerVoiceConfig: {
-                                speakerVoiceConfigs: speakerVoiceConfigs
-                            }
-                        }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${finalApiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorBody = await response.json().catch(() => ({}));
-                    if (response.status === 400 && errorBody.error && errorBody.error.message && errorBody.error.message.includes("API key not valid")) {
-                         throw new Error("API Key tidak valid atau kosong. Harap masukkan API Key Gemini yang benar.");
-                    }
-                    throw new Error(`Gagal menghubungi server (${response.status}). ${errorBody.error?.message || ''}`);
-                }
-
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
-
-                if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                    const rateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
-
-                    const pcmData = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-
-                    currentAudioBlob = wavBlob;
-                    
-                    const audioContainer = document.getElementById('current-audio-container');
-                    const audioPlayer = document.getElementById('current-audio-player');
-                    audioPlayer.src = audioUrl;
-                    audioContainer.classList.remove('hidden');
-                    audioPlayer.play().catch(e => console.log("Auto-play prevented", e));
-
-                    const historyItem = {
-                        id: Date.now().toString(),
-                        url: audioUrl,
-                        blob: wavBlob,
-                        preview: script.substring(0, 50) + '...',
-                        date: new Date().toLocaleString(),
-                        chars: characters.map(c => c.name).join(', ')
-                    };
-                    historyData.unshift(historyItem);
-                    renderHistory();
-
-                } else {
-                    throw new Error("Respons audio dari API tidak valid.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                showError(`Terjadi Kesalahan: ${err.message}`);
-            } finally {
-                setGeneratingState(false);
-            }
-        }
-
-        function renderHistory() {
-            const wrapper = document.getElementById('history-wrapper');
-            const listContainer = document.getElementById('history-list');
-            
-            if (historyData.length === 0) {
-                wrapper.classList.add('hidden');
-                return;
-            }
-            
-            wrapper.classList.remove('hidden');
-            listContainer.innerHTML = '';
-            
-            historyData.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors animate-fade-in-up';
-                itemDiv.innerHTML = `
-                    <div class="mb-3 sm:mb-0 w-full sm:w-2/3 overflow-hidden">
-                        <div class="text-xs md:text-sm font-medium text-slate-800 text-right truncate font-arabic" dir="rtl">${item.preview}</div>
-                        <div class="text-[10px] md:text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
-                            <span>${item.date}</span>
-                            <span class="bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium">${item.chars}</span>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2 w-full sm:w-auto">
-                        <button onclick="playHistory('${item.url}')" class="flex-1 sm:flex-none p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 hover:border-emerald-300 transition-colors flex justify-center items-center" title="Putar">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
-                        </button>
-                        <button onclick="downloadHistory('${item.id}')" class="flex-1 sm:flex-none p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 hover:border-emerald-300 transition-colors flex justify-center items-center" title="Download">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        </button>
-                    </div>
-                `;
-                listContainer.appendChild(itemDiv);
-            });
-        }
-
-        window.playHistory = function(url) {
-            const player = document.getElementById('current-audio-player');
-            const container = document.getElementById('current-audio-container');
-            player.src = url;
-            container.classList.remove('hidden');
-            player.play();
-        }
-
-        window.downloadHistory = function(id) {
-            const item = historyData.find(h => h.id === id);
-            if(item) downloadBlob(item.blob, `Muntiqu_History_${id}.wav`);
-        }
-
-        // Initialize app on load
-        window.onload = initApp;
-    </script>
+<body>
+<header><div><h1>Muntiqu<small>منطق · TTS Monolog & Dialog Arab Fusha</small></h1></div></header>
+<main>
+<aside>
+  <section class="card">
+    <h2>API Key Gemini</h2>
+    <label>Kunci disimpan hanya di browser Anda
+      <input type="password" id="key" autocomplete="off" placeholder="Tempel API Key di sini">
+    </label>
+    <p class="hint" style="margin:0">Gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</p>
+  </section>
+  <section class="card">
+    <h2>Karakter <span class="badge" id="mode"></span></h2>
+    <div id="chars"></div>
+    <button class="btn add" id="add">+ Tambah karakter</button>
+  </section>
+  <section class="card">
+    <h2>Gaya bicara</h2>
+    <label>Kecepatan</label><div class="seg" id="speed" style="margin-bottom:10px"></div>
+    <div class="g2">
+      <label>Jeda koma (،)<select id="comma"></select></label>
+      <label>Jeda titik (.)<select id="period"></select></label>
+    </div>
+    <label>Jeda antar-bagian/pembicara<select id="gap"></select></label>
+  </section>
+</aside>
+
+<section>
+  <div class="card">
+    <div class="row"><h2 style="margin:0">Naskah</h2><button class="btn" id="tpl">Isi contoh</button></div>
+    <p class="hint" id="info"></p>
+    <div class="chips" id="chips" aria-label="Sisipkan nama pembicara"></div>
+    <textarea id="script" dir="rtl" placeholder="اكتب النص العربي هنا…" aria-label="Naskah Arab"></textarea>
+    <div class="hint row"><span id="stat"></span><span>Ctrl + Enter untuk memproses</span></div>
+    <div class="err" id="err" role="alert" hidden></div>
+    <button class="go" id="go">Hasilkan suara</button>
+    <div id="prog" hidden aria-live="polite"><div class="bar"><i id="pbar"></i></div><div class="hint" id="ptxt"></div></div>
+  </div>
+  <div class="card" id="out" hidden>
+    <h2>Hasil terbaru</h2>
+    <audio id="player" controls></audio>
+    <button class="btn" id="dl">Unduh WAV</button>
+  </div>
+  <div class="card" id="hist" hidden><h2>Riwayat sesi ini</h2><div id="hlist"></div></div>
+</section>
+</main>
+
+<script>
+window.addEventListener('error',e=>{const d=document.createElement('div');d.style.cssText='background:#fef3f2;color:#b42318;padding:12px;margin:12px;border:1px solid #fecdca;border-radius:8px';d.textContent='Kesalahan skrip: '+e.message;document.body.prepend(d)});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const MODEL='gemini-2.5-flash-preview-tts';
+const ENDPOINT=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+const VOICES=[
+ {g:'Pria',n:'Charon',l:'Charon – tegas & berat'},{g:'Pria',n:'Fenrir',l:'Fenrir – bersemangat'},{g:'Pria',n:'Orus',l:'Orus – berwibawa'},
+ {g:'Wanita',n:'Kore',l:'Kore – jelas & lantang'},{g:'Wanita',n:'Aoede',l:'Aoede – lembut & tenang'},{g:'Wanita',n:'Leda',l:'Leda – muda & ceria'}];
+const EMO=[
+ ['normal','Normal','natural and conversational'],['kalem','Kalem','calm, relaxed and soothing'],['marah','Marah','angry and stern'],
+ ['sedih','Sedih','sad and melancholic'],['senang','Senang','happy and cheerful'],['dramatis','Dramatis','highly dramatic and theatrical'],
+ ['resmi','Resmi','formal and authoritative'],['berita','Pembaca berita','like a professional news anchor'],
+ ['announcer','Announcer','like a public address announcer'],['pengajar','Pengajar','like a patient, articulate teacher'],
+ ['terkejut','Terkejut','surprised and shocked'],['perasa','Perasa','deeply emotional and touching']].map(([id,l,p])=>({id,l,p}));
+const SPD=[['sangat_lambat','Sangat lambat','at a very slow, deliberate pace'],['lambat','Lambat','at a slow pace'],['normal','Normal','at a normal pace'],['cepat','Cepat','at a fast pace'],['sangat_cepat','Sangat cepat','at a very fast pace']].map(([id,l,p])=>({id,l,p}));
+const CM=[['singkat','Singkat (0.3 dtk)','a brief pause'],['normal','Normal (0.6 dtk)','a normal pause'],['lama','Lama (1 dtk)','a distinct pause']].map(([id,l,p])=>({id,l,p}));
+const PD=[['normal','Normal (1 dtk)','a normal sentence break'],['lama','Lama (1.5 dtk)','a long sentence break'],['sangat_lama','Sangat lama (2.5 dtk)','a very long sentence break']].map(([id,l,p])=>({id,l,p}));
+const GAPS=[[300,'Singkat (0.3 dtk)'],[600,'Normal (0.6 dtk)'],[1000,'Lama (1 dtk)'],[1500,'Sangat lama (1.5 dtk)']];
+
+const S={chars:[{id:uid(),name:'Tariq',voice:'Charon',emo:'normal'},{id:uid(),name:'Aisha',voice:'Aoede',emo:'normal'}],speed:'normal',comma:'normal',period:'normal',gap:600};
+let busy=false,ac=null,curBlob=null,hist=[];
+
+/* ---------- penyimpanan ---------- */
+let st;function save(){clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem('muntiqu',JSON.stringify({k:$('key').value,S,t:$('script').value}))}catch{}},400)}
+function load(){try{const d=JSON.parse(localStorage.getItem('muntiqu')||'null');if(d){Object.assign(S,d.S||{});$('key').value=d.k||'';$('script').value=d.t||''}}catch{}}
+
+/* ---------- UI ---------- */
+const opts=(arr,sel)=>arr.map(o=>`<option value="${o.id}"${o.id===sel?' selected':''}>${esc(o.l)}</option>`).join('');
+function renderChars(){
+ $('chars').innerHTML=S.chars.map((c,i)=>`<div class="card char" data-id="${c.id}">
+  <div class="row"><b>Pembicara ${i+1}</b><button class="ico" data-del title="Hapus karakter" aria-label="Hapus pembicara ${i+1}">✕</button></div>
+  <div class="g2" style="margin-top:8px"><label>Nama<input data-f="name" value="${esc(c.name)}" maxlength="20"></label>
+  <label>Suara<select data-f="voice">${['Pria','Wanita'].map(g=>`<optgroup label="${g}">${VOICES.filter(v=>v.g===g).map(v=>`<option value="${v.n}"${v.n===c.voice?' selected':''}>${v.l}</option>`).join('')}</optgroup>`).join('')}</select></label></div>
+  <label style="margin:0">Emosi<select data-f="emo">${opts(EMO,c.emo)}</select></label></div>`).join('');
+ renderChips();updateMode();
+}
+function renderChips(){$('chips').innerHTML=S.chars.map(c=>`<button type="button" data-n="${esc(c.name)}">${esc(c.name)}</button>`).join('')}
+function updateMode(){
+ const n=S.chars.length,solo=n===1;
+ $('mode').textContent=solo?'Monolog':n===2?'Dialog':`Dialog ${n} orang`;
+ $('chips').hidden=solo;
+ $('info').innerHTML=solo?'Tulis teks Arab langsung, tanpa nama pembicara.':'Awali setiap giliran dengan <code>Nama: teks Arab</code>. Baris tanpa nama dianggap lanjutan pembicara sebelumnya.';
+ stat();
+}
+function fillSeg(){
+ $('speed').innerHTML=SPD.map(s=>`<button type="button" data-s="${s.id}" aria-pressed="${s.id===S.speed}">${s.l}</button>`).join('');
+ $('comma').innerHTML=opts(CM,S.comma);$('period').innerHTML=opts(PD,S.period);
+ $('gap').innerHTML=GAPS.map(([v,l])=>`<option value="${v}"${v===S.gap?' selected':''}>${l}</option>`).join('');
+}
+function stat(){
+ const t=$('script').value;let extra='';
+ try{const j=buildJobs(parse(t));if(j.length)extra=` · ±${j.length} permintaan API`}catch{}
+ $('stat').textContent=`${t.length} karakter${extra}`;
+}
+function showErr(m){$('err').textContent=m;$('err').hidden=false}
+function template(){
+ const c=S.chars;
+ if(c.length===1)return 'أَهْلًا وَسَهْلًا بِكُمْ فِي نَشْرَةِ الْأَخْبَارِ. نُقَدِّمُ لَكُمُ الْيَوْمَ أَهَمَّ الْأَحْدَاثِ. شُكْرًا لِإِصْغَائِكُمْ.';
+ const L=['السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ','وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللَّهِ. كَيْفَ حَالُكُمْ؟','أَنَا بِخَيْرٍ وَالْحَمْدُ لِلَّهِ. هَلْ أَنْتُمْ مُسْتَعِدُّونَ لِلدَّرْسِ؟','نَعَمْ، بِكُلِّ تَأْكِيدٍ.'];
+ return L.map((t,i)=>`${c[i%c.length].name}: ${t}`).join('\n');
+}
+
+/* ---------- parsing naskah ---------- */
+function parse(text){
+ const solo=S.chars.length===1,names=S.chars.map(c=>c.name.trim().toLowerCase()),segs=[];
+ text.split('\n').map(l=>l.trim()).filter(Boolean).forEach((l,i)=>{
+  const m=l.match(/^([^:：]{1,20}?)\s*[:：]\s*(.*)$/);let sp=null,t=l;
+  if(m&&!/[\u0600-\u06FF]/.test(m[1])){
+   const k=names.indexOf(m[1].trim().toLowerCase());
+   if(k>-1){sp=S.chars[k].name.trim();t=m[2]}
+   else if(!solo)throw new Error(`Baris ${i+1}: pembicara "${m[1]}" belum ada di pengaturan karakter.`);
+  }
+  if(solo)sp=S.chars[0].name.trim();
+  if(!sp){if(!segs.length)throw new Error(`Baris ${i+1}: awali dengan "Nama: teks".`);sp=segs[segs.length-1].speaker}
+  if(!t.trim())return;
+  const last=segs[segs.length-1];
+  if(last&&last.speaker===sp)last.text+=' '+t;else segs.push({speaker:sp,text:t});
+ });
+ return segs;
+}
+function chunk(t,max=600){
+ const out=[];let cur='';
+ for(const s of t.replace(/([.!?؟…])\s+/g,'$1\n').split('\n')){if(cur&&(cur+' '+s).length>max){out.push(cur);cur=s}else cur=cur?cur+' '+s:s}
+ if(cur)out.push(cur);return out;
+}
+/* 1 pembicara & 3+ pembicara: satu suara per permintaan. Tepat 2 pembicara: mode multi-speaker Gemini (maks. 2). */
+function buildJobs(segs){
+ const used=[...new Set(segs.map(s=>s.speaker))],J=[];
+ const single=(sp,t)=>chunk(t).forEach(x=>J.push({sp:[sp],text:x}));
+ if(used.length===2){
+  let b=[],n=0;
+  const flush=()=>{if(!b.length)return;const u=[...new Set(b.map(x=>x.speaker))];
+   if(u.length===2)J.push({sp:u,text:b.map(x=>`${x.speaker}: ${x.text}`).join('\n')});else b.forEach(x=>single(x.speaker,x.text));b=[];n=0};
+  segs.forEach(s=>{if(n+s.text.length>1200)flush();b.push(s);n+=s.text.length});flush();
+ }else segs.forEach(s=>single(s.speaker,s.text));
+ return J;
+}
+
+/* ---------- Gemini TTS ---------- */
+const ch=n=>S.chars.find(c=>c.name.trim()===n);
+const pick=(a,id)=>a.find(x=>x.id===id);
+function prompt(j){
+ const pace=`${pick(SPD,S.speed).p}, with ${pick(CM,S.comma).p} at commas and ${pick(PD,S.period).p} at full stops`;
+ if(j.sp.length===1)return `Say in Modern Standard Arabic (Fusha), ${pick(EMO,ch(j.sp[0]).emo).p}, ${pace}:\n\n${j.text}`;
+ return `Make ${j.sp.map(n=>`${n} sound ${pick(EMO,ch(n).emo).p}`).join(' and ')}. Speak in Modern Standard Arabic (Fusha), ${pace}:\n\n${j.text}`;
+}
+async function tts(j,key,signal){
+ const vc=n=>({prebuiltVoiceConfig:{voiceName:ch(n).voice}});
+ const speechConfig=j.sp.length===1?{voiceConfig:vc(j.sp[0])}:{multiSpeakerVoiceConfig:{speakerVoiceConfigs:j.sp.map(n=>({speaker:n,voiceConfig:vc(n)}))}};
+ const body=JSON.stringify({contents:[{parts:[{text:prompt(j)}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig}});
+ for(let a=0;a<4;a++){
+  if(signal.aborted)throw new DOMException('abort','AbortError');
+  const r=await fetch(ENDPOINT,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body});
+  if(r.ok){
+   const p=(await r.json())?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+   if(p?.data){
+    const bin=atob(p.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    return{pcm:new Int16Array(u.buffer,0,u.byteLength>>1),rate:+((p.mimeType||'').match(/rate=(\d+)/)||[])[1]||24000};
+   }
+  }else if(r.status===400||r.status===401||r.status===403){
+   const m=(await r.json().catch(()=>({}))).error?.message||'';
+   throw new Error(/API key/i.test(m)?'API Key tidak valid. Periksa kembali kunci Anda.':`Permintaan ditolak (${r.status}). ${m}`);
+  }
+  await sleep(1500*2**a); // 429 / 5xx / audio kosong → coba lagi
+ }
+ throw new Error('Server tidak mengembalikan audio (kuota habis atau sedang sibuk). Tunggu sebentar lalu coba lagi.');
+}
+function toWav(parts,rate){
+ const n=parts.reduce((s,p)=>s+p.length,0),buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+ const w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+ w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+ v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+ new Int16Array(buf,44).set(new Int16Array(0));let o=44;
+ for(const p of parts){for(let i=0;i<p.length;i++,o+=2)v.setInt16(o,p[i],true)}
+ return{blob:new Blob([buf],{type:'audio/wav'}),sec:n/rate};
+}
+
+/* ---------- alur utama ---------- */
+function setBusy(b){
+ busy=b;const g=$('go');g.textContent=b?'Batalkan':'Hasilkan suara';g.classList.toggle('cancel',b);$('prog').hidden=!b;
+ document.querySelectorAll('#script,#chars input,#chars select,#add,#tpl').forEach(e=>e.disabled=b);
+}
+async function generate(){
+ if(busy){ac&&ac.abort();return}
+ $('err').hidden=true;
+ const key=$('key').value.trim();
+ if(!key)return showErr('Masukkan API Key Gemini di panel kiri.');
+ try{
+  const names=S.chars.map(c=>c.name.trim().toLowerCase());
+  if(names.some(n=>!n||/[:：]/.test(n)))throw new Error('Nama karakter tidak boleh kosong atau mengandung tanda titik dua.');
+  if(new Set(names).size!==names.length)throw new Error('Nama karakter harus unik.');
+  const segs=parse($('script').value);
+  if(!segs.length)throw new Error('Naskah masih kosong.');
+  const jobs=buildJobs(segs);
+  setBusy(true);ac=new AbortController();
+  const parts=[];let rate=24000;
+  for(let i=0;i<jobs.length;i++){
+   $('pbar').style.width=(i/jobs.length*100)+'%';$('ptxt').textContent=`Memproses bagian ${i+1} dari ${jobs.length}…`;
+   const r=await tts(jobs[i],key,ac.signal);rate=r.rate;
+   if(i)parts.push(new Int16Array(Math.round(rate*S.gap/1000)));
+   parts.push(r.pcm);
+  }
+  $('pbar').style.width='100%';
+  const {blob,sec}=toWav(parts,rate);
+  curBlob=blob;const url=URL.createObjectURL(blob);
+  $('player').src=url;$('out').hidden=false;$('player').play().catch(()=>{});
+  hist.unshift({id:uid(),url,blob,txt:segs[0].text,date:new Date().toLocaleTimeString(),who:[...new Set(segs.map(s=>s.speaker))].join(', '),sec});
+  renderHist();
+ }catch(e){
+  showErr(e.name==='AbortError'?'Proses dibatalkan.':e.message||'Terjadi kesalahan tak terduga.');
+ }finally{setBusy(false);ac=null}
+}
+function dl(b,name){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function renderHist(){
+ $('hist').hidden=!hist.length;
+ $('hlist').innerHTML=hist.map(h=>`<div class="hi" data-id="${h.id}"><div class="t"><div class="a">${esc(h.txt)}</div><div class="m">${h.date} · ${esc(h.who)} · ${Math.round(h.sec)} dtk</div></div>
+  <button class="btn" data-a="play" aria-label="Putar">▶</button><button class="btn" data-a="dl" aria-label="Unduh">⬇</button><button class="ico" data-a="rm" aria-label="Hapus">✕</button></div>`).join('');
+}
+
+/* ---------- event ---------- */
+$('chars').addEventListener('input',e=>{
+ const f=e.target.dataset.f,c=S.chars.find(x=>x.id===e.target.closest('.char')?.dataset.id);
+ if(!f||!c)return;c[f]=e.target.value;if(f==='name')renderChips();save();
+});
+$('chars').addEventListener('click',e=>{
+ if(!e.target.closest('[data-del]'))return;
+ if(S.chars.length<=1)return showErr('Minimal harus ada 1 karakter.');
+ S.chars=S.chars.filter(c=>c.id!==e.target.closest('.char').dataset.id);renderChars();save();
+});
+$('add').onclick=()=>{
+ const used=S.chars.map(c=>c.name),v=VOICES.find(x=>!used.includes(x.n))||VOICES[0];
+ let name=v.n,k=2;while(used.includes(name))name=v.n+k++;
+ S.chars.push({id:uid(),name,voice:v.n,emo:'normal'});renderChars();save();
+};
+$('speed').onclick=e=>{const s=e.target.dataset.s;if(s){S.speed=s;fillSeg();save()}};
+$('comma').onchange=e=>{S.comma=e.target.value;save()};
+$('period').onchange=e=>{S.period=e.target.value;save()};
+$('gap').onchange=e=>{S.gap=+e.target.value;save()};
+$('tpl').onclick=()=>{$('script').value=template();stat();save()};
+$('chips').onclick=e=>{
+ const b=e.target.closest('button');if(!b)return;
+ const t=$('script'),p=t.selectionStart,pre=t.value.slice(0,p);
+ t.setRangeText((pre&&!pre.endsWith('\n')?'\n':'')+b.dataset.n+': ',p,t.selectionEnd,'end');t.focus();stat();save();
+};
+$('script').addEventListener('input',()=>{stat();save()});
+$('script').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')generate()});
+$('key').addEventListener('input',save);
+$('go').onclick=generate;
+$('dl').onclick=()=>curBlob&&dl(curBlob,`muntiqu_${Date.now()}.wav`);
+$('hlist').onclick=e=>{
+ const b=e.target.closest('[data-a]');if(!b)return;
+ const h=hist.find(x=>x.id===b.closest('.hi').dataset.id);if(!h)return;
+ if(b.dataset.a==='play'){$('player').src=h.url;curBlob=h.blob;$('out').hidden=false;$('player').play()}
+ else if(b.dataset.a==='dl')dl(h.blob,`muntiqu_${h.id}.wav`);
+ else{URL.revokeObjectURL(h.url);hist=hist.filter(x=>x!==h);renderHist()}
+};
+
+load();fillSeg();renderChars();
+if(!$('script').value.trim())$('script').value=template();
+stat();
+</script>
 </body>
 </html>
