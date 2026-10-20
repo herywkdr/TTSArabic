@@ -204,27 +204,41 @@ function buildJobs(segs){
 /* ---------- Gemini TTS ---------- */
 const ch=n=>S.chars.find(c=>c.name.trim()===n);
 const pick=(a,id)=>a.find(x=>x.id===id);
-function prompt(j){
- const pace=`${pick(SPD,S.speed).p}, with ${pick(CM,S.comma).p} at commas and ${pick(PD,S.period).p} at full stops`;
- if(j.sp.length===1)return `Say in Modern Standard Arabic (Fusha), ${pick(EMO,ch(j.sp[0]).emo).p}, ${pace}:\n\n${j.text}`;
- return `Make ${j.sp.map(n=>`${n} sound ${pick(EMO,ch(n).emo).p}`).join(' and ')}. Speak in Modern Standard Arabic (Fusha), ${pace}:\n\n${j.text}`;
+function style(n){
+ const p=[],e=ch(n)?pick(EMO,ch(n).emo):null;
+ if(e&&e.id!=='normal')p.push(e.p);
+ return p;
+}
+function prompt(j,plain){
+ const g=[];
+ if(S.speed!=='normal')g.push(pick(SPD,S.speed).p);
+ if(S.comma!=='normal')g.push(pick(CM,S.comma).p+' at commas');
+ if(S.period!=='normal')g.push(pick(PD,S.period).p+' at full stops');
+ if(j.sp.length===1){
+  const s=[...style(j.sp[0]),...g].join(', ');
+  return plain||!s?`Say in Arabic: ${j.text}`:`Say ${s}: ${j.text}`;
+ }
+ const who=j.sp.map(n=>({n,s:style(n).join(', ')})).filter(x=>x.s).map(x=>`${x.n} sound ${x.s}`).join(' and ');
+ const head=`TTS the following conversation between ${j.sp[0]} and ${j.sp[1]}`;
+ return plain||(!who&&!g.length)?`${head}:\n${j.text}`:`${head}. ${who?'Make '+who+'. ':''}${g.length?'Speak '+g.join(', ')+'. ':''}\n${j.text}`;
 }
 async function tts(j,key,signal){
  const vc=n=>({prebuiltVoiceConfig:{voiceName:ch(n).voice}});
  const speechConfig=j.sp.length===1?{voiceConfig:vc(j.sp[0])}:{multiSpeakerVoiceConfig:{speakerVoiceConfigs:j.sp.map(n=>({speaker:n,voiceConfig:vc(n)}))}};
- const body=JSON.stringify({contents:[{parts:[{text:prompt(j)}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig}});
+ const mk=plain=>JSON.stringify({contents:[{parts:[{text:prompt(j,plain)}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig}});
  for(let a=0;a<4;a++){
   if(signal.aborted)throw new DOMException('abort','AbortError');
-  const r=await fetch(ENDPOINT,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body});
+  const r=await fetch(ENDPOINT,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:mk(a>=2)});
   if(r.ok){
    const p=(await r.json())?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
    if(p?.data){
     const bin=atob(p.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
     return{pcm:new Int16Array(u.buffer,0,u.byteLength>>1),rate:+((p.mimeType||'').match(/rate=(\d+)/)||[])[1]||24000};
    }
-  }else if(r.status===400||r.status===401||r.status===403){
+  }else{
    const m=(await r.json().catch(()=>({}))).error?.message||'';
-   throw new Error(/API key/i.test(m)?'API Key tidak valid. Periksa kembali kunci Anda.':`Permintaan ditolak (${r.status}). ${m}`);
+   if([400,401,403].includes(r.status)&&!/only be used for TTS/i.test(m))
+    throw new Error(/API key/i.test(m)?'API Key tidak valid. Periksa kembali kunci Anda.':`Permintaan ditolak (${r.status}). ${m}`);
   }
   await sleep(1500*2**a); // 429 / 5xx / audio kosong → coba lagi
  }
