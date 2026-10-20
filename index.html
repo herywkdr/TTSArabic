@@ -529,14 +529,14 @@
                 }).join('\n');
 
                 const systemPrompt = `You are a professional voice director generating a TTS sequence.
-Read the following Arabic (Fusha/Modern Standard Arabic) conversation.
+Read the following Arabic (Fusha/Modern Standard Arabic) text.
 Instructions:
 - Speak ${speedConfig}.
 - Pacing/Pauses: Take ${commaConfig} whenever you encounter a comma (، or ,). Take ${periodConfig} whenever you encounter a period (.).
 ${emotionInstructions}
 
-Conversation Transcript:
-${script}`;
+Transcript:
+${finalScript}`;
 
                 const speakerVoiceConfigs = characters.map(c => ({
                     speaker: c.name,
