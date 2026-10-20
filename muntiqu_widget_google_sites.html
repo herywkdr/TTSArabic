@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muntiqu - Pembuat Percakapan Arab</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['"Scheherazade New"', '"Amiri"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animasi sederhana */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        /* Custom scrollbar untuk text area */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-emerald-200">
+
+    <!-- HEADER -->
+    <header class="bg-emerald-800 text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-5 md:py-6">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Muntiqu <span class="text-emerald-300 font-light text-lg md:text-xl">| منتق</span></h1>
+            <p class="mt-1 md:mt-2 text-emerald-100 text-xs md:text-sm">Widget TTS Percakapan Bahasa Arab Fusha - Google Sites Edition</p>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 py-6 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+        
+        <!-- LEFT PANEL: SETTINGS -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <!-- API KEY SETTING -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
+                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    Koneksi API (Wajib)
+                </h2>
+                <div>
+                    <label class="block text-xs md:text-sm text-slate-600 mb-2">Google Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="Paste API Key di sini..." class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow">
+                    <p class="text-[10px] md:text-xs text-slate-400 mt-2">Dapatkan API Key gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-emerald-500 hover:underline">Google AI Studio</a>. Key ini disimpan sementara di browser Anda.</p>
+                </div>
+            </div>
+
+            <!-- CHARACTER SETTINGS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
+                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    Pengaturan Karakter
+                </h2>
+                
+                <div id="characters-list" class="space-y-4 mb-4">
+                    <!-- Characters will be injected here via JS -->
+                </div>
+
+                <button id="add-char-btn" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 transition-all flex items-center justify-center text-sm font-medium">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Karakter
+                </button>
+            </div>
+
+            <!-- GLOBAL SETTINGS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
+                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Kecepatan Bicara
+                </h2>
+                <div id="speed-container" class="flex bg-slate-100 p-1 rounded-lg">
+                    <!-- Speeds will be injected here via JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL: EDITOR & OUTPUT -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- SCRIPT EDITOR -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full min-h-[400px]">
+                <div class="p-3 md:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
+                    <h2 class="font-semibold flex items-center text-sm md:text-base">
+                        <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Teks Percakapan
+                    </h2>
+                    <button id="template-btn" class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 md:px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors border border-emerald-100">
+                        Isi Template
+                    </button>
+                </div>
+                
+                <div class="p-3 md:p-4 flex-grow flex flex-col">
+                    <div class="mb-3 text-xs md:text-sm text-slate-600 bg-blue-50 border border-blue-100 p-3 rounded-xl">
+                        <p><strong>Format Wajib:</strong> <code class="bg-white px-1.5 py-0.5 rounded text-blue-700 font-semibold border border-blue-200">NamaKarakter: Teks Arab</code></p>
+                    </div>
+                    
+                    <textarea id="script-input" dir="rtl" class="w-full flex-grow min-h-[250px] p-4 text-right text-lg md:text-xl border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y font-arabic leading-loose shadow-inner" placeholder="Tariq: مرحباً..."></textarea>
+                </div>
+                
+                <div class="p-3 md:p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                    <!-- Error Container -->
+                    <div id="error-msg-container" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs md:text-sm rounded-lg flex items-start">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="error-msg-text"></span>
+                    </div>
+                    
+                    <button id="generate-btn" class="w-full py-3 px-4 rounded-xl text-white font-semibold flex justify-center items-center transition-all bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg text-sm md:text-base">
+                        <span id="generate-btn-content" class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Hasilkan Suara Percakapan
+                        </span>
+                        <span id="generate-btn-loading" class="hidden flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Memproses Audio...
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CURRENT AUDIO PLAYER -->
+            <div id="current-audio-container" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl shadow-sm border border-emerald-100 p-4 md:p-5 animate-fade-in-up">
+                <h3 class="font-semibold text-emerald-800 mb-3 text-sm md:text-base">Hasil Audio Terbaru</h3>
+                <audio id="current-audio-player" controls class="w-full mb-4 rounded-xl shadow-sm"></audio>
+                <button id="download-current-btn" class="w-full bg-white border border-emerald-200 text-emerald-700 font-medium py-2 px-4 rounded-xl shadow-sm hover:bg-emerald-50 transition-colors flex items-center justify-center text-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download WAV
+                </button>
+            </div>
+
+            <!-- HISTORY LIST -->
+            <div id="history-wrapper" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
+                <h2 class="text-base md:text-lg font-semibold border-b border-slate-100 pb-3 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Riwayat Pembuatan
+                </h2>
+                <div id="history-list" class="space-y-3">
+                    <!-- History items will be injected here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION & CONSTANTS
+        // ==========================================
+        const VOICES = {
+            MALE: [
+                { name: 'Tariq', voice: 'Charon', label: 'Tariq (Tegas & Berat)' },
+                { name: 'Zaid', voice: 'Fenrir', label: 'Zaid (Bersemangat)' },
+                { name: 'Omar', voice: 'Orus', label: 'Omar (Berwibawa)' }
+            ],
+            FEMALE: [
+                { name: 'Fatima', voice: 'Kore', label: 'Fatima (Jelas & Lantang)' },
+                { name: 'Aisha', voice: 'Aoede', label: 'Aisha (Lembut & Tenang)' },
+                { name: 'Layla', voice: 'Leda', label: 'Layla (Muda & Ceria)' }
+            ]
+        };
+
+        const EMOTIONS = [
+            { id: 'normal', label: 'Normal (Default)', prompt: 'normal and natural' },
+            { id: 'kalem', label: 'Kalem', prompt: 'calm, relaxed, and soothing' },
+            { id: 'marah', label: 'Marah', prompt: 'angry, furious, and stern' },
+            { id: 'sedih', label: 'Sedih', prompt: 'sad, melancholic, and heartbroken' },
+            { id: 'senang', label: 'Senang', prompt: 'happy, joyful, and cheerful' },
+            { id: 'dramatis', label: 'Dramatis', prompt: 'highly dramatic, theatrical, and expressive' },
+            { id: 'resmi', label: 'Resmi', prompt: 'official, formal, and authoritative' },
+            { id: 'pembaca_berita', label: 'Pembaca Berita', prompt: 'like a professional news anchor, clear and objective' },
+            { id: 'announcer', label: 'Announcer (Bandara)', prompt: 'like a public address announcer at an airport, echoing and clear' },
+            { id: 'pengajar', label: 'Pengajar', prompt: 'like an articulate teacher, explanatory and patient' },
+            { id: 'terkejut', label: 'Terkejut', prompt: 'surprised, shocked, and gasping' },
+            { id: 'perasa', label: 'Perasa', prompt: 'highly emotional, sensitive, and touching' }
+        ];
+
+        const SPEEDS = [
+            { id: 'lambat', label: 'Lambat', prompt: 'at a slow, deliberate pace' },
+            { id: 'normal', label: 'Normal', prompt: 'at a normal conversational pace' },
+            { id: 'cepat', label: 'Cepat', prompt: 'at a fast, urgent pace' }
+        ];
+
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        let characters = [
+            { id: Date.now().toString(), name: 'Tariq', voice: 'Charon', emotion: 'normal' },
+            { id: (Date.now() + 1).toString(), name: 'Aisha', voice: 'Aoede', emotion: 'normal' }
+        ];
+        let currentSpeed = 'normal';
+        let isGenerating = false;
+        let historyData = [];
+        let currentAudioBlob = null;
+
+        // Default template script
+        const defaultScript = 'Tariq: السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ\nAisha: وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ. كَيْفَ حَالُكَ يَا طَارِق؟\nTariq: أَنَا بِخَيْرٍ وَالْحَمْدُ لِلَّهِ. هَلْ أَنْتِ مُسْتَعِدَّةٌ لِلدَّرْسِ الْيَوْم؟\nAisha: نَعَمْ، بِكُلِّ تَأْكِيد.';
+
+        // ==========================================
+        // AUDIO PROCESSING UTILITIES
+        // ==========================================
+        function base64ToArrayBuffer(base64) {
+            const binary_string = window.atob(base64);
+            const len = binary_string.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary_string.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1; // Gemini TTS returns mono
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const buffer = new ArrayBuffer(44 + pcm16.byteLength);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.byteLength, true);
+            writeString(view, 8, 'WAVE');
+            
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true); 
+            view.setUint16(20, 1, true); 
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true); 
+            
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16.byteLength, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // UI RENDERING & LOGIC
+        // ==========================================
+        
+        function initApp() {
+            // Load API Key from local storage if exists
+            const savedKey = localStorage.getItem('muntiqu_api_key');
+            if (savedKey) document.getElementById('api-key-input').value = savedKey;
+
+            document.getElementById('script-input').value = defaultScript;
+            renderCharacters();
+            renderSpeedOptions();
+            
+            // Event Listeners
+            document.getElementById('add-char-btn').addEventListener('click', addCharacter);
+            document.getElementById('template-btn').addEventListener('click', insertTemplate);
+            document.getElementById('generate-btn').addEventListener('click', handleGenerate);
+            document.getElementById('download-current-btn').addEventListener('click', () => {
+                if(currentAudioBlob) downloadBlob(currentAudioBlob, `Muntiqu_${Date.now()}.wav`);
+            });
+            
+            document.getElementById('api-key-input').addEventListener('change', (e) => {
+                localStorage.setItem('muntiqu_api_key', e.target.value.trim());
+            });
+        }
+
+        function renderCharacters() {
+            const container = document.getElementById('characters-list');
+            container.innerHTML = '';
+
+            // Options builders
+            const buildMaleOptions = (selected) => VOICES.MALE.map(v => `<option value="${v.name}" ${v.name === selected ? 'selected' : ''}>${v.label}</option>`).join('');
+            const buildFemaleOptions = (selected) => VOICES.FEMALE.map(v => `<option value="${v.name}" ${v.name === selected ? 'selected' : ''}>${v.label}</option>`).join('');
+            const buildEmotionOptions = (selected) => EMOTIONS.map(e => `<option value="${e.id}" ${e.id === selected ? 'selected' : ''}>${e.label}</option>`).join('');
+
+            characters.forEach((char, index) => {
+                const charDiv = document.createElement('div');
+                charDiv.className = 'p-3 md:p-4 bg-slate-50 rounded-xl border border-slate-200 relative group animate-fade-in-up';
+                charDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-medium text-xs md:text-sm text-slate-500 uppercase tracking-wider">Pembicara ${index + 1}</span>
+                        <button onclick="removeCharacter('${char.id}')" class="text-slate-400 hover:text-red-500 transition-colors" title="Hapus Karakter">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] md:text-xs text-slate-500 mb-1">Nama / Suara</label>
+                            <select onchange="updateCharacter('${char.id}', 'name', this.value)" class="w-full text-xs md:text-sm bg-white border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <optgroup label="Pria">${buildMaleOptions(char.name)}</optgroup>
+                                <optgroup label="Wanita">${buildFemaleOptions(char.name)}</optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs text-slate-500 mb-1">Emosi / Nuansa</label>
+                            <select onchange="updateCharacter('${char.id}', 'emotion', this.value)" class="w-full text-xs md:text-sm bg-white border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                ${buildEmotionOptions(char.emotion)}
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(charDiv);
+            });
+        }
+
+        function renderSpeedOptions() {
+            const container = document.getElementById('speed-container');
+            container.innerHTML = '';
+            SPEEDS.forEach(s => {
+                const btn = document.createElement('button');
+                btn.innerText = s.label;
+                btn.className = `flex-1 py-1.5 md:py-2 text-xs md:text-sm rounded-md transition-all ${currentSpeed === s.id ? 'bg-white shadow-sm font-semibold text-emerald-700' : 'text-slate-500 hover:text-slate-700'}`;
+                btn.onclick = () => {
+                    currentSpeed = s.id;
+                    renderSpeedOptions();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function addCharacter() {
+            const usedNames = characters.map(c => c.name);
+            const allAvailable = [...VOICES.MALE, ...VOICES.FEMALE];
+            const available = allAvailable.find(v => !usedNames.includes(v.name)) || VOICES.MALE[0];
+            characters.push({ id: Date.now().toString(), name: available.name, voice: available.voice, emotion: 'normal' });
+            renderCharacters();
+        }
+
+        window.removeCharacter = function(id) {
+            if (characters.length <= 1) {
+                showError("Harus ada minimal 1 karakter.");
+                return;
+            }
+            characters = characters.filter(c => c.id !== id);
+            renderCharacters();
+        }
+
+        window.updateCharacter = function(id, field, value) {
+            const charIndex = characters.findIndex(c => c.id === id);
+            if (charIndex > -1) {
+                characters[charIndex][field] = value;
+                if (field === 'name') {
+                    const allVoices = [...VOICES.MALE, ...VOICES.FEMALE];
+                    const matchedVoice = allVoices.find(v => v.name === value);
+                    if (matchedVoice) characters[charIndex].voice = matchedVoice.voice;
+                }
+                renderCharacters(); // re-render to reflect changes
+            }
+        }
+
+        function insertTemplate() {
+            if (characters.length >= 2) {
+                const scriptEl = document.getElementById('script-input');
+                scriptEl.value = `${characters[0].name}: أَهْلًا وَسَهْلًا\n${characters[1].name}: أَهْلًا بِكَ`;
+            } else {
+                showError("Butuh minimal 2 karakter untuk template ini.");
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('error-msg-text').innerText = msg;
+            document.getElementById('error-msg-container').classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-msg-container').classList.add('hidden');
+        }
+
+        function setGeneratingState(isGen) {
+            isGenerating = isGen;
+            const btn = document.getElementById('generate-btn');
+            const content = document.getElementById('generate-btn-content');
+            const loading = document.getElementById('generate-btn-loading');
+            
+            if (isGen) {
+                btn.classList.replace('bg-emerald-600', 'bg-emerald-400');
+                btn.classList.add('cursor-not-allowed');
+                btn.disabled = true;
+                content.classList.add('hidden');
+                loading.classList.remove('hidden');
+            } else {
+                btn.classList.replace('bg-emerald-400', 'bg-emerald-600');
+                btn.classList.remove('cursor-not-allowed');
+                btn.disabled = false;
+                content.classList.remove('hidden');
+                loading.classList.add('hidden');
+            }
+        }
+
+        async function handleGenerate() {
+            if (isGenerating) return;
+            hideError();
+
+            const apiKeyInput = document.getElementById('api-key-input').value.trim();
+            // In Canvas it works without key, but outside it requires a key. 
+            // Replace HARDCODED_API_KEY with your key if you don't want users to input it.
+            const HARDCODED_API_KEY = ""; 
+            const finalApiKey = HARDCODED_API_KEY || apiKeyInput || "";
+
+            const script = document.getElementById('script-input').value;
+            if (!script.trim()) {
+                showError("Teks percakapan tidak boleh kosong.");
+                return;
+            }
+
+            const lines = script.split('\n').filter(line => line.trim().length > 0);
+            let validFormat = true;
+            for (let line of lines) {
+                if (!line.includes(':')) {
+                    validFormat = false;
+                    break;
+                }
+            }
+
+            if (!validFormat) {
+                showError("Format script salah. Pastikan menggunakan format 'Nama: Teks'. (Contoh: Tariq: السلام)");
+                return;
+            }
+
+            setGeneratingState(true);
+
+            try {
+                const speedConfig = SPEEDS.find(s => s.id === currentSpeed).prompt;
+                let emotionInstructions = characters.map(c => {
+                    const emotionPrompt = EMOTIONS.find(e => e.id === c.emotion).prompt;
+                    return `Make speaker ${c.name} sound ${emotionPrompt}.`;
+                }).join('\n');
+
+                const systemPrompt = `You are a professional voice director generating a TTS sequence.
+Read the following Arabic (Fusha/Modern Standard Arabic) conversation.
+Instructions:
+- Speak ${speedConfig}.
+${emotionInstructions}
+
+Conversation Transcript:
+${script}`;
+
+                const speakerVoiceConfigs = characters.map(c => ({
+                    speaker: c.name,
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: c.voice } }
+                }));
+
+                const payload = {
+                    contents: [{ parts: [{ text: systemPrompt }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            multiSpeakerVoiceConfig: {
+                                speakerVoiceConfigs: speakerVoiceConfigs
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${finalApiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}));
+                    if(response.status === 400 && errorBody.error && errorBody.error.message.includes("API key not valid")) {
+                         throw new Error("API Key tidak valid atau kosong. Harap masukkan API Key Gemini yang benar.");
+                    }
+                    throw new Error(`Gagal menghubungi server (${response.status}). ${errorBody.error?.message || ''}`);
+                }
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    currentAudioBlob = wavBlob;
+                    
+                    // Show current audio player
+                    const audioContainer = document.getElementById('current-audio-container');
+                    const audioPlayer = document.getElementById('current-audio-player');
+                    audioPlayer.src = audioUrl;
+                    audioContainer.classList.remove('hidden');
+                    audioPlayer.play().catch(e => console.log("Auto-play prevented", e));
+
+                    // Add to history
+                    const historyItem = {
+                        id: Date.now().toString(),
+                        url: audioUrl,
+                        blob: wavBlob,
+                        preview: script.substring(0, 50) + '...',
+                        date: new Date().toLocaleString(),
+                        chars: characters.map(c => c.name).join(', ')
+                    };
+                    historyData.unshift(historyItem);
+                    renderHistory();
+
+                } else {
+                    throw new Error("Respons audio dari API tidak valid.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showError(`Terjadi Kesalahan: ${err.message}`);
+            } finally {
+                setGeneratingState(false);
+            }
+        }
+
+        function renderHistory() {
+            const wrapper = document.getElementById('history-wrapper');
+            const listContainer = document.getElementById('history-list');
+            
+            if (historyData.length === 0) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+            
+            wrapper.classList.remove('hidden');
+            listContainer.innerHTML = '';
+            
+            historyData.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors animate-fade-in-up';
+                itemDiv.innerHTML = `
+                    <div class="mb-3 sm:mb-0 w-full sm:w-2/3 overflow-hidden">
+                        <div class="text-xs md:text-sm font-medium text-slate-800 text-right truncate font-arabic" dir="rtl">${item.preview}</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                            <span>${item.date}</span>
+                            <span class="bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium">${item.chars}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 w-full sm:w-auto">
+                        <button onclick="playHistory('${item.url}')" class="flex-1 sm:flex-none p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 hover:border-emerald-300 transition-colors flex justify-center items-center" title="Putar">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                        </button>
+                        <button onclick="downloadHistory('${item.id}')" class="flex-1 sm:flex-none p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 hover:border-emerald-300 transition-colors flex justify-center items-center" title="Download">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        window.playHistory = function(url) {
+            const player = document.getElementById('current-audio-player');
+            const container = document.getElementById('current-audio-container');
+            player.src = url;
+            container.classList.remove('hidden');
+            player.play();
+        }
+
+        window.downloadHistory = function(id) {
+            const item = historyData.find(h => h.id === id);
+            if(item) downloadBlob(item.blob, `Muntiqu_History_${id}.wav`);
+        }
+
+        // Initialize app on load
+        window.onload = initApp;
+    </script>
+</body>
+</html>
